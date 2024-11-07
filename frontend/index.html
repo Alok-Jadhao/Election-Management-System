@@ -1,17 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Election Management System</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Management System</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1 class="mt-5">Election Management System</h1>
-    <div id="constituencies" class="mt-4"></div>
-  </div>
-  <script src="script.js"></script>
+    <header>
+        <h1>Election Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#" class="nav-link" data-target="candidates-section">Candidates</a></li>
+            <li><a href="#" class="nav-link" data-target="constituencies-section">Constituencies</a></li>
+            <li><a href="#" class="nav-link" data-target="polling-stations-section">Polling Stations</a></li>
+            <li><a href="#" class="nav-link" data-target="voters-section">Voters</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Candidates Section -->
+        <section id="candidates-section" class="hidden">
+            <h2>Candidates</h2>
+            <ul id="candidates-list">
+                <!-- Candidates will be displayed here -->
+            </ul>
+        </section>
+
+        <!-- Constituencies Section -->
+        <section id="constituencies-section" class="hidden">
+            <h2>Constituencies</h2>
+            <ul id="constituencies-list">
+                <!-- Constituencies will be displayed here -->
+            </ul>
+        </section>
+
+        <!-- Polling Stations Section -->
+        <section id="polling-stations-section" class="hidden">
+            <h2>Polling Stations</h2>
+            <ul id="polling-stations-list">
+                <!-- Polling stations will be displayed here -->
+            </ul>
+        </section>
+
+        <!-- Voters Section -->
+        <section id="voters-section" class="hidden">
+            <h2>Voters</h2>
+            <ul id="voters-list">
+                <!-- Voters will be displayed here -->
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Election Management System</p>
+    </footer>
+
+    <script src="app.js"></script>
 </body>
 </html>
-
