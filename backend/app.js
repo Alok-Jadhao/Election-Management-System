@@ -107,9 +107,6 @@ app.get('/constituencies', (req, res) => {
 app.post('/constituencies', (req, res) => {
     const { constituency_id, name, population, no_of_polling_booths, no_of_candidates } = req.body;
 
-    // Log the received data
-    console.log('Received constituency data:', req.body);
-
     // Check if the constituency already exists
     const checkQuery = 'SELECT * FROM Constituency WHERE constituency_id = ?';
     db.query(checkQuery, [constituency_id], (err, results) => {
@@ -119,7 +116,6 @@ app.post('/constituencies', (req, res) => {
         }
 
         if (results.length > 0) {
-            // If a constituency with the same ID exists, you can choose to update it or return an error
             return res.status(400).json({ message: 'Constituency ID already exists. Please use a different ID.' });
         }
 
@@ -169,7 +165,7 @@ app.delete('/constituencies/:constituency_id', (req, res) => {
 
 // Polling Stations Routes
 app.get('/polling-stations', (req, res) => {
-    const query = 'SELECT * FROM PollingStationinfo';
+    const query = 'SELECT * FROM PollingStationInfo';
     db.query(query, (err, results) => {
         if (err) {
             console.error('Error fetching polling stations:', err);
@@ -187,7 +183,7 @@ app.post('/polling-stations', (req, res) => {
         return res.status(400).send('All fields are required');
     }
 
-    const query = 'INSERT INTO PollingStationinfo (station_id, name, constituency_id, location) VALUES (?, ?, ?, ?)';
+    const query = 'INSERT INTO PollingStationInfo (station_id, name, constituency_id, location) VALUES (?, ?, ?, ?)';
     db.query(query, [station_id, name, constituency_id, location], (err) => {
         if (err) {
             console.error('Error inserting polling station:', err);
@@ -206,7 +202,7 @@ app.put('/polling-stations/:station_id', (req, res) => {
         return res.status(400).send('All fields are required');
     }
 
-    const query = 'UPDATE PollingStationinfo SET name = ?, constituency_id = ?, location = ? WHERE station_id = ?';
+    const query = 'UPDATE PollingStationInfo SET name = ?, constituency_id = ?, location = ? WHERE station_id = ?';
     db.query(query, [name, constituency_id, location, station_id], (err) => {
         if (err) {
             console.error('Error updating polling station:', err);
@@ -219,7 +215,7 @@ app.put('/polling-stations/:station_id', (req, res) => {
 
 app.delete('/polling-stations/:station_id', (req, res) => {
     const { station_id } = req.params;
-    const query = 'DELETE FROM PollingStationinfo WHERE station_id = ?';
+    const query = 'DELETE FROM PollingStationInfo WHERE station_id = ?';
     db.query(query, [station_id], (err) => {
         if (err) {
             console.error('Error deleting polling station:', err);
@@ -232,7 +228,7 @@ app.delete('/polling-stations/:station_id', (req, res) => {
 
 // Voters Routes
 app.get('/voters', (req, res) => {
-    const query = 'SELECT * FROM Voterinfo';
+    const query = 'SELECT * FROM VoterInfo';
     db.query(query, (err, results) => {
         if (err) {
             console.error('Error fetching voters:', err);
@@ -244,57 +240,33 @@ app.get('/voters', (req, res) => {
 });
 
 app.post('/voters', (req, res) => {
-    const { voter_id, name, address, gender, dob, age, constituency_id } = req.body;
+    const { voter_id, name, age, address, constituency_id, voted } = req.body;
 
-    // Log the received data
-    console.log('Received voter data:', req.body);
-
-    // Validate input
-    if (!voter_id || isNaN(voter_id)) {
-        return res.status(400).json({ message: 'Valid voter ID is required.' });
-    }
-    if (!name || name.trim() === '') {
-        return res.status(400).json({ message: 'Name is required.' });
-    }
-    if (!address || address.trim() === '') {
-        return res.status(400).json({ message: 'Address is required.' });
-    }
-    if (!gender || (gender !== 'Male' && gender !== 'Female' && gender !== 'Other')) {
-        return res.status(400).json({ message: 'Valid gender is required (Male, Female, Other).' });
-    }
-    if (!dob) {
-        return res.status(400).json({ message: 'Date of birth is required.' });
-    }
-    if (!age || isNaN(age) || age < 0) {
-        return res.status(400).json({ message: 'Valid age is required.' });
+    if (!voter_id || !name || !age || !address || !constituency_id || voted === undefined) {
+        return res.status(400).send('All fields are required');
     }
 
-    // Example SQL query to insert voter
-    const query = 'INSERT INTO voterinfo (voter_id, name, address, gender, dob, age, constituency_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    db.query(query, [voter_id, name, address, gender, dob, age, constituency_id], (err, results) => {
+    const query = 'INSERT INTO VoterInfo (voter_id, name, age, address, constituency_id, voted) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(query, [voter_id, name, age, address, constituency_id, voted], (err) => {
         if (err) {
-            console.error('Error inserting voter:', err); // Log the error
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ message: 'Voter ID already exists.' });
-            } else if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-                return res.status(400).json({ message: 'Constituency ID does not exist.' });
-            }
-            return res.status(500).json({ message: 'Error inserting voter', error: err });
+            console.error('Error inserting voter:', err);
+            res.status(500).send('Error inserting data');
+            return;
         }
-        res.status(200).json({ message: 'Voter inserted successfully' });
+        res.json({ message: 'Voter inserted successfully' });
     });
 });
 
 app.put('/voters/:voter_id', (req, res) => {
     const { voter_id } = req.params;
-    const { name, age, constituency_id } = req.body;
+    const { name, age, address, constituency_id, voted } = req.body;
 
-    if (!name || !age || !constituency_id) {
+    if (!name || !age || !address || !constituency_id || voted === undefined) {
         return res.status(400).send('All fields are required');
     }
 
-    const query = 'UPDATE Voterinfo SET name = ?, age = ?, constituency_id = ? WHERE voter_id = ?';
-    db.query(query, [name, age, constituency_id, voter_id], (err) => {
+    const query = 'UPDATE VoterInfo SET name = ?, age = ?, address = ?, constituency_id = ?, voted = ? WHERE voter_id = ?';
+    db.query(query, [name, age, address, constituency_id, voted, voter_id], (err) => {
         if (err) {
             console.error('Error updating voter:', err);
             res.status(500).send('Error updating data');
@@ -306,7 +278,7 @@ app.put('/voters/:voter_id', (req, res) => {
 
 app.delete('/voters/:voter_id', (req, res) => {
     const { voter_id } = req.params;
-    const query = 'DELETE FROM Voterinfo WHERE voter_id = ?';
+    const query = 'DELETE FROM VoterInfo WHERE voter_id = ?';
     db.query(query, [voter_id], (err) => {
         if (err) {
             console.error('Error deleting voter:', err);
@@ -319,5 +291,5 @@ app.delete('/voters/:voter_id', (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Election Management System backend listening at http://localhost:${port}`);
 });
